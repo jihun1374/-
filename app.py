@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import time
-import yfinance as yf  # 📊 실시간 주가 연동을 위한 라이브러리 추가
+import yfinance as yf  # 📊 실시간 주가 연동 라이브러리
 
 # ⚙️ 1. 페이지 설정
 st.set_page_config(
@@ -83,50 +83,40 @@ menu = st.sidebar.radio(
     ["🏠 홈", "💰 배당", "📊 포트폴리오", "📄 리포트", "⚙️ 설정"]
 )
 
-# 🌐 [실시간 데이터 처리] 야후 파이낸스에서 SCHD 실시간 데이터 긁어오기
-# (인터넷에서 가져오는 속도가 있으므로, 성능을 위해 잠시 캐싱하거나 안전하게 처리합니다)
-@st.cache_data(ttl=60)  # 60초 동안은 금융 서버에 부담을 주지 않기 위해 데이터를 기억합니다.
+# 🌐 [실시간 데이터 처리] 야후 파이낸스에서 TIGER 미국배당다우존스(453850.KS) 데이터 긁어오기
+@st.cache_data(ttl=60)
 def get_realtime_data():
     try:
-        # SCHD 데이터 가져오기
-        schd = yf.Ticker("SCHD")
-        schd_price = schd.history(period="1d")['Close'].iloc[-1]  # 현재 주가 ($)
+        # TIGER 미국배당다우존스 티커 조회
+        tiger_div = yf.Ticker("453850.KS")
+        tiger_price = tiger_div.history(period="1d")['Close'].iloc[-1]  # 현재 주가 (원)
         
-        # 안전하게 배당 수익률 가져오기 (없으면 기본값 3.5%)
-        schd_info = schd.info
-        schd_div_yield = schd_info.get('dividendYield', 0.035) * 100  # 퍼센트 전환
-        
-        # 환율 (원/달러) 정보도 실시간으로 가져옵니다 (USDKRW=X)
-        exchange_rate_ticker = yf.Ticker("USDKRW=X")
-        exchange_rate = exchange_rate_ticker.history(period="1d")['Close'].iloc[-1]
+        # 한국 상장 ETF는 info에서 dividendYield가 안 나오는 경우가 많아 한국 상장 다우존스 평균 시가배당률(약 3.8%) 적용
+        tiger_yield = 3.8
     except:
-        # 혹시 라이브러리 오류나 네트워크 문제가 생겼을 때 앱이 멈추지 않게 기본값 세팅
-        schd_price = 82.50
-        schd_div_yield = 3.5
-        exchange_rate = 1380.0
+        # 네트워크 오류 시 기본 가격 세팅
+        tiger_price = 11450.0
+        tiger_yield = 3.8
         
-    return schd_price, schd_div_yield, exchange_rate
+    return tiger_price, tiger_yield
 
-# 실시간 주가 및 환율 변수 저장
-schd_current_price_usd, schd_yield, current_usdkrw = get_realtime_data()
+# 실시간 주가 및 배당률 변수 저장
+tiger_current_price, tiger_yield = get_realtime_data()
 
-# 지훈님의 SCHD 실제 보유 수량 설정 (예시: 120주)
-schd_quantity = 120
-schd_total_usd = schd_quantity * schd_current_price_usd
-schd_total_krw = schd_total_usd * current_usdkrw
+#  보유 수량 설정 (예시: 1,200주)
+tiger_quantity = 1200
+tiger_total_krw = tiger_quantity * tiger_current_price
 
-# 기타 자산 및 S&P500 수치 계산 (SCHD 실시간 가격에 연동되어 총 자산이 변하게 설정)
+# 기타 자산 수치 계산
 sp500_value_krw = 40000000
 etc_value_krw = 10000000
-total_asset_krw = schd_total_krw + sp500_value_krw + etc_value_krw
+total_asset_krw = tiger_total_krw + sp500_value_krw + etc_value_krw
 
 
 # 💳 6. 각 메뉴별 화면 구현
-# ────────────────────────────────────────────────────────
 # 🏠 홈 화면
-# ────────────────────────────────────────────────────────
 if menu == "🏠 홈":
-    st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다. (현재 적용 환율: 1$ = {current_usdkrw:,.1f}원)")
+    st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다.")
     st.markdown("### 안녕하세요 지훈님 👋")
     st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 목요일")
     
@@ -135,31 +125,31 @@ if menu == "🏠 홈":
     left_col, right_col = st.columns([1, 1])
 
     with left_col:
-        # 자산 요약 카드 (실시간 반영 총 자산)
+        # 자산 요약 카드
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("💳 총 자산")
         st.markdown(f"## **{total_asset_krw:,.0f}원**")
         st.divider()
         mc1, mc2, mc3 = st.columns(3)
-        mc1.metric("총 평가손익", "+13,850,000", delta_color="inverse")
-        mc2.metric("오늘 평가손익", "+430,000")
-        mc3.metric("총 수익률", "+12.4%")
+        mc1.metric("총 평가손익", "+11,250,000원", delta_color="inverse")
+        mc2.metric("오늘 평가손익", "+210,000원")
+        mc3.metric("총 수익률", "+10.8%")
         st.markdown('</div>', unsafe_allow_html=True)
 
         # 배당 현황 카드
         st.markdown('<div class="dividend-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #2e7d32;'>💰 배당 현황</h3>", unsafe_allow_html=True)
         dc1, dc2, dc3 = st.columns(3)
-        dc1.metric("이번 달 예상", "153,000원")
-        dc2.metric("연 예상 배당", "1,920,000원")
-        dc3.metric("배당수익률", f"{schd_yield:.2f}%") # 실시간 SCHD 배당수익률 연동
+        dc1.metric("이번 달 예상", "145,000원")
+        dc2.metric("연 예상 배당", "1,850,000원")
+        dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
         st.markdown('</div>', unsafe_allow_html=True)
 
         # 계좌 현황 카드
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("🏦 계좌 현황")
         ac1, ac2, ac3 = st.columns(3)
-        ac1.metric("ISA", f"{schd_total_krw:,.0f}원") # ISA 계좌에 SCHD 실시간 자산 반영
+        ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")  # ISA 계좌에 TIGER 실시간 반영
         ac2.metric("연금저축1", "18,000,000원")
         ac3.metric("연금저축2", "35,000,000원")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -169,9 +159,9 @@ if menu == "🏠 홈":
         st.subheader("📅 다음 배당 일정")
         cal_col1, cal_col2 = st.columns([1, 2])
         with cal_col1:
-            st.markdown("**6월 25일**\n\n**6월 30일**")
+            st.markdown("**6월 2일**\n\n**6월 15일**")
         with cal_col2:
-            st.markdown(f"SCHD <span style='color:green;'>(${schd_current_price_usd:,.2f})</span><br>TIGER 미국배당다우존스 <span style='color:blue;'>(42,000원)</span>", unsafe_allow_html=True)
+            st.markdown(f"TIGER 미국배당다우존스 <span style='color:green;'>({tiger_current_price:,.0f}원)</span><br>TIGER 미국S&P500 <span style='color:blue;'>(16,500원)</span>", unsafe_allow_html=True)
         
         if st.button("배당 전체보기", key="go_div", use_container_width=True):
             st.info("배당 탭으로 이동 기능을 구현할 예정입니다.")
@@ -198,9 +188,9 @@ if menu == "🏠 홈":
     st.subheader("📊 내 포트폴리오 분석 (상세 시뮬레이션)")
     
     graph_data = {
-        "종목명": ["SCHD", "S&P 500", "기타 자산"],
-        "자산가치": [schd_total_krw, sp500_value_krw, etc_value_krw],  # 실시간 원화 가치 반영!
-        "예상배당금": [schd_total_krw * (schd_yield/100), 52000, 0]          
+        "종목명": ["TIGER 미국배당다우존스", "S&P 500", "기타 자산"],
+        "자산가치": [tiger_total_krw, sp500_value_krw, etc_value_krw],
+        "예상배당금": [tiger_total_krw * (tiger_yield/100), 52000, 0]          
     }
     df_graph = pd.DataFrame(graph_data)
     
@@ -216,29 +206,24 @@ if menu == "🏠 홈":
         fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    # ────────────────────────────────────────────────────────
     # 📈 보유종목 TOP 10 (실제 증권사 어플 스타일 두 줄 레이아웃)
-    # ────────────────────────────────────────────────────────
-    st.markdown("---")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("📈 보유종목 TOP 10")
     
-    # 1. 화면에 표시할 실제 및 예시 데이터 계산/정의
-    # (SCHD는 위에서 계산된 실시간 원화 가치 및 실시간 가격 적용)
-    schd_purchase_price = 75.20  # 예시 매입단가 ($)
-    schd_profit_krw = schd_total_krw - (schd_quantity * schd_purchase_price * current_usdkrw)
-    schd_profit_rate = (schd_current_price_usd - schd_purchase_price) / schd_purchase_price * 100
+    tiger_purchase_price = 10150.0  # 예시 평단가 (원)
+    tiger_profit_krw = tiger_total_krw - (tiger_quantity * tiger_purchase_price)
+    tiger_profit_rate = (tiger_current_price - tiger_purchase_price) / tiger_purchase_price * 100
 
     display_stocks = [
         {
-            "name": "458730.kr",
-            "total_value": f"{schd_total_krw:,.0f}원",
-            "profit": f"{schd_profit_krw:+,.0f}원",
-            "profit_color": "#d32f2f" if schd_profit_krw >= 0 else "#1565c0",
-            "quantity": f"{schd_quantity}주",
-            "buy_price": f"${schd_purchase_price:,.2f}",
-            "current_price": f"${schd_current_price_usd:,.2f}",
-            "rate": f"{schd_profit_rate:+.2f}%"
+            "name": "TIGER 미국배당다우존스 (실시간)",
+            "total_value": f"{tiger_total_krw:,.0f}원",
+            "profit": f"{tiger_profit_krw:+,.0f}원",
+            "profit_color": "#d32f2f" if tiger_profit_krw >= 0 else "#1565c0",
+            "quantity": f"{tiger_quantity:,}주",
+            "buy_price": f"{tiger_purchase_price:,.0f}원",
+            "current_price": f"{tiger_current_price:,.0f}원",
+            "rate": f"{tiger_profit_rate:+.2f}%"
         },
         {
             "name": "TIGER 미국S&P500",
@@ -262,11 +247,9 @@ if menu == "🏠 홈":
         }
     ]
 
-    # 2. 증권사 앱 스타일 루프 돌며 두 줄 카드 출력
     for s in display_stocks:
         st.markdown(f"""
         <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-            <!-- 첫째 줄: 종목명 | 평가금액 (평가손익) -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="font-weight: bold; font-size: 15px; color: #212529;">{s['name']}</span>
                 <span style="font-weight: bold; font-size: 15px; color: #212529;">
@@ -274,7 +257,6 @@ if menu == "🏠 홈":
                     <span style="font-size: 12px; font-weight: normal; color: {s['profit_color']}; margin-left: 4px;">({s['profit']})</span>
                 </span>
             </div>
-            <!-- 둘째 줄: 보유수량 · 매입단가 · 현재가 · 수익률 -->
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6c757d;">
                 <div>
                     <span>보유: <b style="color:#495057;">{s['quantity']}</b></span>
@@ -291,9 +273,7 @@ if menu == "🏠 홈":
         """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ────────────────────────────────────────────────────────
 # 💰 배당 화면
-# ────────────────────────────────────────────────────────
 elif menu == "💰 배당":
     st.title("📅 배당 상세 대시보드")
     st.caption("배당 투자자를 위한 월별 현금흐름 및 성장성 분석")
@@ -314,7 +294,7 @@ elif menu == "💰 배당":
         
     with sum3:
         st.markdown('<div class="dividend-card" style="text-align: center;">', unsafe_allow_html=True)
-        st.metric("예상 연 배당금", "₩1,920,000")
+        st.metric("예상 연 배당금", "₩1,850,000")
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
@@ -335,9 +315,9 @@ elif menu == "💰 배당":
         st.subheader("📈 연간 배당 성장 추이")
         yearly_data = pd.DataFrame({
             "연도": ["2024", "2025", "2026 예상"],
-            "연간 배당금(원)": [1200000, 1550000, 1920000]
+            "연간 배당금(원)": [1200000, 1550000, 1850000]
         })
-        fig_yearly = px.line(yearly_data, x="연도", y="연간 배당금(원)", markers=True, color_discrete_sequence=["#1565c0"])
+        fig_yearly = px.line(yearly_data, x="연度", y="연간 배당금(원)", markers=True, color_discrete_sequence=["#1565c0"])
         fig_yearly.update_traces(line=dict(width=4), marker=dict(size=10))
         fig_yearly.update_layout(height=350, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_yearly, use_container_width=True, config={'displayModeBar': False})
@@ -349,30 +329,27 @@ elif menu == "💰 배당":
     with stock_col1:
         st.markdown(f"""
         <div class="card">
-            <h3>🇺🇸 SCHD (실시간 연동)</h3>
-            <p><b>보유수량:</b> {schd_quantity}주</p>
-            <p><b>현재 주가:</b> ${schd_current_price_usd:,.2f}</p>
-            <p><b>원화 가치:</b> {schd_total_krw:,.0f}원</p>
-            <p style="color:#2e7d32;"><b>실시간 배당수익률:</b> {schd_yield:.2f}%</p>
+            <h3>🇰🇷 TIGER 미국배당다우존스 (실시간)</h3>
+            <p><b>보유수량:</b> {tiger_quantity:,}주</p>
+            <p><b>현재 주가:</b> {tiger_current_price:,.0f}원</p>
+            <p><b>원화 가치:</b> {tiger_total_krw:,.0f}원</p>
+            <p style="color:#2e7d32;"><b>예상 배당수익률:</b> {tiger_yield:.2f}%</p>
         </div>
         """, unsafe_allow_html=True)
         
     with stock_col2:
         st.markdown("""
         <div class="card">
-            <h3>🇰🇷 TIGER 미국배당다우존스</h3>
-            <p><b>보유수량:</b> 120주 (예시)</p>
-            <p><b>연 예상 배당:</b> 420,000원</p>
-            <p style="color:#2e7d32;"><b>배당수익률:</b> 4.2%</p>
+            <h3>🇰🇷 TIGER 미국S&P500</h3>
+            <p><b>보유수량:</b> 145주</p>
+            <p><b>연 예상 배당:</b> 52,000원</p>
+            <p style="color:#2e7d32;"><b>배당수익률:</b> 1.4%</p>
         </div>
         """, unsafe_allow_html=True)
 
-# ────────────────────────────────────────────────────────
 # 📊 포트폴리오 화면
-# ────────────────────────────────────────────────────────
 elif menu == "📊 포트폴리오":
     st.title("💼 포트폴리오 및 리밸런싱 전략")
-    st.caption("설정한 목표 비중과 현재 비중을 비교하여 최적의 리밸런싱 타이밍을 안내합니다.")
     st.divider()
 
     portfolio_data = pd.DataFrame({
@@ -380,61 +357,13 @@ elif menu == "📊 포트폴리오":
         "목표 비중(%)": [25, 25, 20, 15, 10, 5],
         "현재 비중(%)": [23, 27, 16, 18, 11, 5]
     })
+    st.dataframe(portfolio_data, use_container_width=True, hide_index=True)
 
-    st.subheader("📊 목표 비중 vs 현재 비중 비교")
-    fig_compare = px.bar(portfolio_data, x="자산군", y=["목표 비중(%)", "현재 비중(%)"], barmode="group", color_discrete_sequence=["#1565c0", "#43a047"])
-    fig_compare.update_layout(height=400, yaxis_title="비중 (%)", legend_title="구분")
-    st.plotly_chart(fig_compare, use_container_width=True, config={'displayModeBar': False})
-
-    st.divider()
-
-    p_col1, p_col2 = st.columns([1.1, 0.9])
-    with p_col1:
-        st.subheader("📝 자산별 비중 상세 현황")
-        portfolio_data["차이(%)"] = portfolio_data["현재 비중(%)"] - portfolio_data["목표 비중(%)"]
-        st.dataframe(portfolio_data, use_container_width=True, hide_index=True)
-
-    with p_col2:
-        st.subheader("⚠️ 리밸런싱 추천 행동")
-        has_issue = False
-        for index, row in portfolio_data.iterrows():
-            diff = row["차이(%)"]
-            if diff <= -3:
-                has_issue = True
-                st.markdown(f"""
-                <div class="warn-card">
-                    <h4 style="margin:0; color:#b78103;">🚨 매수 권장: {row['자산군']}</h4>
-                    <p style="margin:5px 0 0 0;">
-                        현재 비중이 목표보다 <b>{abs(diff)}% 부족</b>합니다. (목표: {row['목표 비중(%)']}% / 현재: {row['현재 비중(%)']}%)<br>
-                        👉 <b>자산 배분 균형을 위해 추가 매수를 고려해보세요.</b>
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-            elif diff >= 3:
-                has_issue = True
-                st.markdown(f"""
-                <div class="card" style="border-left: 5px solid #d32f2f; background-color: #ffebee;">
-                    <h4 style="margin:0; color:#c62828;">📢 비중 과다: {row['자산군']}</h4>
-                    <p style="margin:5px 0 0 0;">
-                        현재 비중이 목표보다 <b>{diff}% 초과</b>되었습니다. (목표: {row['목표 비중(%)']}% / 현재: {row['현재 비중(%)']}%)<br>
-                        👉 <b>일부 익절 후 부족한 자산(금 등)을 채우는 것을 권장합니다.</b>
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-        if not has_issue:
-            st.success("✅ 모든 자산이 목표 비중 안에서 안정적으로 유지되고 있습니다!")
-
-# ────────────────────────────────────────────────────────
-# 나머지 탭들
-# ────────────────────────────────────────────────────────
 elif menu == "📄 리포트":
     st.title("📊 월간 투자 리포트")
-    st.info("6월 한 달간의 자산 변화 리포트 공간입니다.")
 
 elif menu == "⚙️ 설정":
     st.title("⚙️ 앱 설정 및 API 연동")
-    st.info("한국투자증권 API 연동 및 알림 설정 공간입니다.")
 
 # ⏱️ 7. 지정된 시간(30초) 대기 후 화면 자동 새로고침
 time.sleep(st.session_state.refresh_interval)
