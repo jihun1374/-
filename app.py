@@ -83,20 +83,20 @@ menu = st.sidebar.radio(
     ["🏠 홈", "💰 배당", "📊 포트폴리오", "📄 리포트", "⚙️ 설정"]
 )
 
-# 🌐 [실시간 데이터 처리] 야후 파이낸스에서 TIGER 미국배당다우존스(453850.KS) 데이터 긁어오기
+# 🌐 [실시간 데이터 처리] 야후 파이낸스에서 TIGER 미국배당다우존스(458730.KS) 데이터 긁어오기
 @st.cache_data(ttl=60)
 def get_realtime_data():
     try:
-        # TIGER 미국배당다우존스 티커 조회
-        tiger_div = yf.Ticker("453850.KS")
+        # ⚠️ 정확한 티커 458730.KS로 수정 완료!
+        tiger_div = yf.Ticker("458730.KS")
         tiger_price = tiger_div.history(period="1d")['Close'].iloc[-1]  # 현재 주가 (원)
         
-        # 한국 상장 ETF는 info에서 dividendYield가 안 나오는 경우가 많아 한국 상장 다우존스 평균 시가배당률(약 3.8%) 적용
-        tiger_yield = 3.8
+        # 기본 시가배당률 세팅 (약 2.7% ~ 3.8% 유동적 반영)
+        tiger_yield = 2.75
     except:
         # 네트워크 오류 시 기본 가격 세팅
-        tiger_price = 11450.0
-        tiger_yield = 3.8
+        tiger_price = 15600.0
+        tiger_yield = 2.75
         
     return tiger_price, tiger_yield
 
