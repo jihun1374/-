@@ -3,7 +3,22 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 
-# 페이지 기본 설정
+st.set_page_config(
+    page_title="포트폴리오",
+    page_icon="📈",
+    layout="wide"
+)
+
+import time
+
+if 'refresh_interval' not in st.session_state:
+    st.session_state.refresh_interval = 30  # 기본값 30초
+
+st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다.")
+# =========================================================
+
+# # 🎨 금융 앱 스타일 카드 디자인을 위한 CSS 적용
+# st.markdown(""" ... """)
 st.set_page_config(
     page_title="포트폴리오",
     page_icon="📈",
@@ -352,3 +367,6 @@ elif menu == "📄 리포트":
 elif menu == "⚙️ 설정":
     st.title("⚙️ 앱 설정 및 API 연동")
     st.info("한국투자증권 API 연동 및 알림 설정 공간입니다.")
+ 
+time.sleep(st.session_state.refresh_interval)
+st.rerun()
