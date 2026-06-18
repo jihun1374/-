@@ -2,30 +2,20 @@
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import time
 
+# ⚙️ 1. 페이지 설정 (반드시 파일 최상단에 딱 한 번만 와야 합니다)
 st.set_page_config(
     page_title="포트폴리오",
     page_icon="📈",
     layout="wide"
 )
 
-import time
-
+# 🔄 2. 자동 새로고침 주기 설정값 선언
 if 'refresh_interval' not in st.session_state:
     st.session_state.refresh_interval = 30  # 기본값 30초
 
-st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다.")
-# =========================================================
-
-# # 🎨 금융 앱 스타일 카드 디자인을 위한 CSS 적용
-# st.markdown(""" ... """)
-st.set_page_config(
-    page_title="포트폴리오",
-    page_icon="📈",
-    layout="wide"
-)
-
-# 🎨 금융 앱 스타일 카드 디자인을 위한 CSS 적용
+# 🎨 3. 금융 앱 스타일 카드 디자인을 위한 CSS 적용
 st.markdown("""
     <style>
         .block-container { padding-top: 2rem; }
@@ -55,13 +45,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 1️⃣ 세션 상태 및 로그인 관리
+# 🔐 4. 세션 상태 및 로그인 관리
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "setup_done" not in st.session_state:
     st.session_state.setup_done = False
 
-# 로그인 화면
+# [화면 A] 로그인 화면
 if not st.session_state.logged_in:
     st.title("💰 배당 포트폴리오")
     st.caption("배당 투자자를 위한 자산관리 앱")
@@ -73,7 +63,7 @@ if not st.session_state.logged_in:
         st.rerun()
     st.stop()
 
-# 최초 설정 화면
+# [화면 B] 최초 설정 화면
 if not st.session_state.setup_done:
     st.title("최초 설정")
     st.button("한국투자증권 계좌 연동", use_container_width=True)
@@ -85,7 +75,7 @@ if not st.session_state.setup_done:
     st.stop()
 
 
-# 2️⃣ 사이드바 메뉴 (하단 메뉴 역할을 하는 내비게이션)
+# 🧭 5. 사이드바 메뉴 (하단 메뉴 역할을 하는 내비게이션)
 st.sidebar.title("🧭 메뉴")
 menu = st.sidebar.radio(
     "이동할 화면을 선택하세요",
@@ -93,12 +83,13 @@ menu = st.sidebar.radio(
 )
 
 
-# 3️⃣ 각 메뉴별 화면 구현
+# 💳 6. 각 메뉴별 화면 구현
 # ────────────────────────────────────────────────────────
 # 🏠 홈 화면
 # ────────────────────────────────────────────────────────
 if menu == "🏠 홈":
-    # 최상단 인사말
+    # 최상단 업데이트 알림 및 인사말
+    st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다.")
     st.markdown("### 안녕하세요 지훈님 👋")
     st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 목요일")
     
@@ -118,55 +109,6 @@ if menu == "🏠 홈":
         mc2.metric("오늘 평가손익", "+430,000")
         mc3.metric("총 수익률", "+12.4%")
         st.markdown('</div>', unsafe_allow_html=True)
-
-        import pandas as pd
-import plotly.express as px
-
-# =========================================================
-# [2단계] 자산 비중 및 미래 배당금 시뮬레이션 그래프 추가
-# =========================================================
-st.markdown("---")
-st.subheader("📊 내 포트폴리오 분석")
-
-# 1. 예시 데이터 (지훈님의 실제 포트폴리오 데이터에 맞게 추후 수정 가능)
-# 예시로 SCHD와 S&P 500 등을 넣었습니다.
-data = {
-    "종목명": ["SCHD", "S&P 500", "기타 자산"],
-    "자산가치": [5000000, 4000000, 1000000],  # 원화 기준 예시
-    "예상배당금": [175000, 52000, 0]          # 연간 배당금 예시
-}
-df = pd.DataFrame(data)
-
-# 화면을 반으로 나누어 왼쪽에는 원형 차트, 오른쪽에는 막대 차트 배치
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("#### 🍩 종목별 자산 비중")
-    # Plotly를 이용한 예쁜 원형(도넛) 차트 그리기
-    fig_pie = px.pie(
-        df, 
-        values="자산가치", 
-        names="종목명", 
-        hole=0.4,
-        color_discrete_sequence=px.colors.qualitative.Pastel
-    )
-    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-    st.plotly_chart(fig_pie, use_container_width=True)
-
-with col2:
-    st.markdown("#### 💰 종목별 연간 예상 배당금 (Cash Flow)")
-    # Plotly를 이용한 깔끔한 막대 차트 그리기
-    fig_bar = px.bar(
-        df, 
-        x="종목명", 
-        y="예상배당금", 
-        text="예상배당금",
-        color="종목명",
-        color_discrete_sequence=px.colors.qualitative.Pastel
-    )
-    fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
-    st.plotly_chart(fig_bar, use_container_width=True)
-# =========================================================
 
         # 배당 현황 카드 (초록색 강조)
         st.markdown('<div class="dividend-card">', unsafe_allow_html=True)
@@ -212,12 +154,35 @@ with col2:
         st.subheader("Pie 자산배분 현황")
         allocation = pd.DataFrame({
             "자산": ["S&P500", "나스닥100", "금", "채권", "반도체", "인도"],
-            "비중": [23, 27, 16, 18, 11, 5] # 현재 비중 반영
+            "비중": [23, 27, 16, 18, 11, 5]
         })
         fig = px.pie(allocation, names="자산", values="비중", hole=0.4)
         fig.update_layout(margin=dict(t=0, b=0, l=0, r=0), height=220)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
         st.markdown('</div>', unsafe_allow_html=True)
+
+    # 📊 [추가된 2단계 그래프 위치] 홈 화면 카드들 바로 아래에 깔리게 설정했습니다.
+    st.markdown("---")
+    st.subheader("📊 내 포트폴리오 분석 (상세 시뮬레이션)")
+    
+    graph_data = {
+        "종목명": ["SCHD", "S&P 500", "기타 자산"],
+        "자산가치": [5000000, 4000000, 1000000],  
+        "예상배당금": [175000, 52000, 0]          
+    }
+    df_graph = pd.DataFrame(graph_data)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("#### 🍩 종목별 자산 비중")
+        fig_pie = px.pie(df_graph, values="자산가치", names="종목명", hole=0.4, color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig_pie, use_container_width=True)
+    with col2:
+        st.markdown("#### 💰 종목별 연간 예상 배당금 (Cash Flow)")
+        fig_bar = px.bar(df_graph, x="종목명", y="예상배당금", text="예상배당금", color="종목명", color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
+        st.plotly_chart(fig_bar, use_container_width=True)
 
     # 하단 보유종목 TOP 5
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -232,14 +197,13 @@ with col2:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────────────
-# 나머지 탭들 (틀 만들기)
+# 💰 배당 화면
 # ────────────────────────────────────────────────────────
 elif menu == "💰 배당":
     st.title("📅 배당 상세 대시보드")
     st.caption("배당 투자자를 위한 월별 현금흐름 및 성장성 분석")
     st.divider()
 
-    # [1] 상단 요약 영역
     st.subheader("📊 배당 요약")
     sum1, sum2, sum3 = st.columns(3)
     
@@ -260,57 +224,33 @@ elif menu == "💰 배당":
 
     st.divider()
 
-    # Layout 분할 (좌측: 월별 그래프 / 우측: 배당 성장 추이)
     g_col1, g_col2 = st.columns([1.2, 0.8])
-
     with g_col1:
-        # [2] 월별 배당 막대그래프
         st.subheader("🎵 월별 배당 현금흐름")
-        
         monthly_data = pd.DataFrame({
             "월": ["1월", "2월", "3월", "4월", "5월", "6월"],
             "배당금(원)": [120000, 110000, 180000, 140000, 160000, 150000]
         })
-        
-        # Plotly 막대그래프 생성
-        fig_monthly = px.bar(
-            monthly_data, 
-            x="월", 
-            y="배당금(원)", 
-            text="배당금(원)", # 막대 위에 금액 표시
-            color_discrete_sequence=["#2e7d32"] # 초록색 계열 테마
-        )
+        fig_monthly = px.bar(monthly_data, x="월", y="배당금(원)", text="배당금(원)", color_discrete_sequence=["#2e7d32"])
         fig_monthly.update_traces(texttemplate='%{text}:,원', textposition='outside')
         fig_monthly.update_layout(height=350, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_monthly, use_container_width=True, config={'displayModeBar': False})
 
     with g_col2:
-        # [3] 배당 성장 추이 그래프 (투자 의욕 뿜뿜 영역!)
         st.subheader("📈 연간 배당 성장 추이")
-        
         yearly_data = pd.DataFrame({
             "연도": ["2024", "2025", "2026 예상"],
             "연간 배당금(원)": [1200000, 1550000, 1920000]
         })
-        
-        fig_yearly = px.line(
-            yearly_data, 
-            x="연도", 
-            y="연간 배당금(원)", 
-            markers=True, # 꺾은선에 점 표시
-            color_discrete_sequence=["#1565c0"]
-        )
+        fig_yearly = px.line(yearly_data, x="연도", y="연간 배당금(원)", markers=True, color_discrete_sequence=["#1565c0"])
         fig_yearly.update_traces(line=dict(width=4), marker=dict(size=10))
         fig_yearly.update_layout(height=350, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_yearly, use_container_width=True, config={'displayModeBar': False})
 
     st.divider()
 
-    # [4] 종목별 배당 현황 카드 레이아웃
     st.subheader("🔍 종목별 배당 상세")
-    
     stock_col1, stock_col2 = st.columns(2)
-    
     with stock_col1:
         st.markdown("""
         <div class="card">
@@ -331,56 +271,38 @@ elif menu == "💰 배당":
         </div>
         """, unsafe_allow_html=True)
 
+# ────────────────────────────────────────────────────────
+# 📊 포트폴리오 화면
+# ────────────────────────────────────────────────────────
 elif menu == "📊 포트폴리오":
     st.title("💼 포트폴리오 및 리밸런싱 전략")
     st.caption("설정한 목표 비중과 현재 비중을 비교하여 최적의 리밸런싱 타이밍을 안내합니다.")
     st.divider()
 
-    # [1] 데이터 준비 (목표 비중 vs 현재 비중)
     portfolio_data = pd.DataFrame({
         "자산군": ["S&P500", "나스닥100", "금", "채권", "반도체", "인도"],
         "목표 비중(%)": [25, 25, 20, 15, 10, 5],
         "현재 비중(%)": [23, 27, 16, 18, 11, 5]
     })
 
-    # [2] 목표 vs 현재 비교 막대 그래프 (두 개의 막대를 나란히 보여줌)
     st.subheader("📊 목표 비중 vs 현재 비중 비교")
-    
-    fig_compare = px.bar(
-        portfolio_data,
-        x="자산군",
-        y=["목표 비중(%)", "현재 비중(%)"],
-        barmode="group", # 막대를 나란히 배치
-        color_discrete_sequence=["#1565c0", "#43a047"] # 파란색(목표), 초록색(현재)
-    )
+    fig_compare = px.bar(portfolio_data, x="자산군", y=["목표 비중(%)", "현재 비중(%)"], barmode="group", color_discrete_sequence=["#1565c0", "#43a047"])
     fig_compare.update_layout(height=400, yaxis_title="비중 (%)", legend_title="구분")
     st.plotly_chart(fig_compare, use_container_width=True, config={'displayModeBar': False})
 
     st.divider()
 
-    # 화면을 좌우로 나누어 표와 리밸런싱 알림을 배치
     p_col1, p_col2 = st.columns([1.1, 0.9])
-
     with p_col1:
-        # [3] 상세 표 보기
         st.subheader("📝 자산별 비중 상세 현황")
-        
-        # 계산 편리하게 차이(괴리율) 컬럼 추가
         portfolio_data["차이(%)"] = portfolio_data["현재 비중(%)"] - portfolio_data["목표 비중(%)"]
-        
-        # 표 예쁘게 출력
         st.dataframe(portfolio_data, use_container_width=True, hide_index=True)
 
     with p_col2:
-        # [4] 리밸런싱 알림 엔진 (코딩으로 조건문 처리하기)
         st.subheader("⚠️ 리밸런싱 추천 행동")
-        
-        # 데이터를 한 줄씩 읽으면서 목표보다 부족한 자산 찾기
         has_issue = False
         for index, row in portfolio_data.iterrows():
             diff = row["차이(%)"]
-            
-            # 목표보다 3% 이상 부족한 경우 알림 생성 (예: 금 ETF)
             if diff <= -3:
                 has_issue = True
                 st.markdown(f"""
@@ -392,8 +314,6 @@ elif menu == "📊 포트폴리오":
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            # 목표보다 3% 이상 초과한 경우 (예: 나스닥100)
             elif diff >= 3:
                 has_issue = True
                 st.markdown(f"""
@@ -409,6 +329,9 @@ elif menu == "📊 포트폴리오":
         if not has_issue:
             st.success("✅ 모든 자산이 목표 비중 안에서 안정적으로 유지되고 있습니다!")
 
+# ────────────────────────────────────────────────────────
+# 나머지 탭들
+# ────────────────────────────────────────────────────────
 elif menu == "📄 리포트":
     st.title("📊 월간 투자 리포트")
     st.info("6월 한 달간의 자산 변화 리포트 공간입니다.")
@@ -416,6 +339,7 @@ elif menu == "📄 리포트":
 elif menu == "⚙️ 설정":
     st.title("⚙️ 앱 설정 및 API 연동")
     st.info("한국투자증권 API 연동 및 알림 설정 공간입니다.")
- 
+
+# ⏱️ 7. 지정된 시간(30초) 대기 후 화면 자동 새로고침 (가장 마지막 위치)
 time.sleep(st.session_state.refresh_interval)
 st.rerun()
