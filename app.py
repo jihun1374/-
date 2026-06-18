@@ -119,6 +119,55 @@ if menu == "🏠 홈":
         mc3.metric("총 수익률", "+12.4%")
         st.markdown('</div>', unsafe_allow_html=True)
 
+        import pandas as pd
+import plotly.express as px
+
+# =========================================================
+# [2단계] 자산 비중 및 미래 배당금 시뮬레이션 그래프 추가
+# =========================================================
+st.markdown("---")
+st.subheader("📊 내 포트폴리오 분석")
+
+# 1. 예시 데이터 (지훈님의 실제 포트폴리오 데이터에 맞게 추후 수정 가능)
+# 예시로 SCHD와 S&P 500 등을 넣었습니다.
+data = {
+    "종목명": ["SCHD", "S&P 500", "기타 자산"],
+    "자산가치": [5000000, 4000000, 1000000],  # 원화 기준 예시
+    "예상배당금": [175000, 52000, 0]          # 연간 배당금 예시
+}
+df = pd.DataFrame(data)
+
+# 화면을 반으로 나누어 왼쪽에는 원형 차트, 오른쪽에는 막대 차트 배치
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### 🍩 종목별 자산 비중")
+    # Plotly를 이용한 예쁜 원형(도넛) 차트 그리기
+    fig_pie = px.pie(
+        df, 
+        values="자산가치", 
+        names="종목명", 
+        hole=0.4,
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+    fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+    st.plotly_chart(fig_pie, use_container_width=True)
+
+with col2:
+    st.markdown("#### 💰 종목별 연간 예상 배당금 (Cash Flow)")
+    # Plotly를 이용한 깔끔한 막대 차트 그리기
+    fig_bar = px.bar(
+        df, 
+        x="종목명", 
+        y="예상배당금", 
+        text="예상배당금",
+        color="종목명",
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+    fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
+    st.plotly_chart(fig_bar, use_container_width=True)
+# =========================================================
+
         # 배당 현황 카드 (초록색 강조)
         st.markdown('<div class="dividend-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #2e7d32;'>💰 배당 현황</h3>", unsafe_allow_html=True)
