@@ -217,7 +217,6 @@ if menu == "🏠 홈":
         st.plotly_chart(fig_bar, use_container_width=True)
 
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("📈 보유종목 TOP")
     # ────────────────────────────────────────────────────────
     # 📈 보유종목 TOP 10 (실제 증권사 어플 스타일 두 줄 레이아웃)
     # ────────────────────────────────────────────────────────
@@ -232,7 +231,7 @@ if menu == "🏠 홈":
 
     display_stocks = [
         {
-            "name": "SCHD (미국 실시간 연동)",
+            "name": "458730.kr",
             "total_value": f"{schd_total_krw:,.0f}원",
             "profit": f"{schd_profit_krw:+,.0f}원",
             "profit_color": "#d32f2f" if schd_profit_krw >= 0 else "#1565c0",
