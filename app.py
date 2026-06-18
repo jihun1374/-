@@ -218,13 +218,78 @@ if menu == "🏠 홈":
 
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("📈 보유종목 TOP")
-    stocks = pd.DataFrame({
-        "종목명": ["SCHD (미국 실시간 연동)", "TIGER 미국S&P500", "TIGER 미국나스닥100"],
-        "평가금액": [f"{schd_total_krw:,.0f}", "12,500,000", "8,200,000"],
-        "수익률": ["+9.4%", "+13.2%", "+18.5%"],
-        "수량": [schd_quantity, 145, 80]
-    })
-    st.dataframe(stocks, use_container_width=True, hide_index=True)
+    # ────────────────────────────────────────────────────────
+    # 📈 보유종목 TOP 10 (실제 증권사 어플 스타일 두 줄 레이아웃)
+    # ────────────────────────────────────────────────────────
+    st.markdown("---")
+    st.subheader("📈 보유종목 TOP 10")
+    
+    # 1. 화면에 표시할 실제 및 예시 데이터 계산/정의
+    # (SCHD는 위에서 계산된 실시간 원화 가치 및 실시간 가격 적용)
+    schd_purchase_price = 75.20  # 예시 매입단가 ($)
+    schd_profit_krw = schd_total_krw - (schd_quantity * schd_purchase_price * current_usdkrw)
+    schd_profit_rate = (schd_current_price_usd - schd_purchase_price) / schd_purchase_price * 100
+
+    display_stocks = [
+        {
+            "name": "SCHD (미국 실시간 연동)",
+            "total_value": f"{schd_total_krw:,.0f}원",
+            "profit": f"{schd_profit_krw:+,.0f}원",
+            "profit_color": "#d32f2f" if schd_profit_krw >= 0 else "#1565c0",
+            "quantity": f"{schd_quantity}주",
+            "buy_price": f"${schd_purchase_price:,.2f}",
+            "current_price": f"${schd_current_price_usd:,.2f}",
+            "rate": f"{schd_profit_rate:+.2f}%"
+        },
+        {
+            "name": "TIGER 미국S&P500",
+            "total_value": "12,500,000원",
+            "profit": "+1,450,000원",
+            "profit_color": "#d32f2f",
+            "quantity": "145주",
+            "buy_price": "76,200원",
+            "current_price": "86,200원",
+            "rate": "+13.12%"
+        },
+        {
+            "name": "TIGER 미국나스닥100",
+            "total_value": "8,200,000원",
+            "profit": "+1,280,000원",
+            "profit_color": "#d32f2f",
+            "quantity": "80주",
+            "buy_price": "86,500원",
+            "current_price": "102,500원",
+            "rate": "+18.50%"
+        }
+    ]
+
+    # 2. 증권사 앱 스타일 루프 돌며 두 줄 카드 출력
+    for s in display_stocks:
+        st.markdown(f"""
+        <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <!-- 첫째 줄: 종목명 | 평가금액 (평가손익) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: bold; font-size: 15px; color: #212529;">{s['name']}</span>
+                <span style="font-weight: bold; font-size: 15px; color: #212529;">
+                    {s['total_value']} 
+                    <span style="font-size: 12px; font-weight: normal; color: {s['profit_color']}; margin-left: 4px;">({s['profit']})</span>
+                </span>
+            </div>
+            <!-- 둘째 줄: 보유수량 · 매입단가 · 현재가 · 수익률 -->
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6c757d;">
+                <div>
+                    <span>보유: <b style="color:#495057;">{s['quantity']}</b></span>
+                    <span style="margin: 0 6px; color:#dee2e6;">|</span>
+                    <span>매입: <b style="color:#495057;">{s['buy_price']}</b></span>
+                    <span style="margin: 0 6px; color:#dee2e6;">|</span>
+                    <span>현재: <b style="color:#495057;">{s['current_price']}</b></span>
+                </div>
+                <div style="font-weight: bold; color: {s['profit_color']}; font-size: 13px;">
+                    {s['rate']}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ────────────────────────────────────────────────────────
