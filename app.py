@@ -198,7 +198,6 @@ if menu == "🏠 홈":
             ac1.metric("ISA", "-")
             ac2.metric("연금저축1", "-")
             ac3.metric("연금저축2", "35,000,000원")
-            )
         
         # 2. 선택된 계좌별 데이터 로직 (나중에 API 연결 시 이 부분이 메인입니다!)
         ac1, ac2, ac3 = st.columns(3)
