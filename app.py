@@ -166,15 +166,14 @@ total_asset_krw = tiger_total_krw + sp500_value_krw + etc_value_krw
 
 
 # 💳 6. 각 메뉴별 화면 구현
-# 🏠 홈 화면 (PC/모바일 동일하게 1단 세로 배치로 전면 수정)
+# 🏠 홈 화면
 if menu == "🏠 홈":
     st.caption(f"🔄 {st.session_state.refresh_interval}초마다 주가가 실시간으로 업데이트됩니다.")
     st.markdown("### 안녕하세요 지훈님 👋")
-    st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 목요일")
+    st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 수요일")
     
     st.divider()
 
-    # 🛑 원래 left_col에 있던 자산 현황 요약 카드들을 순서대로 배치
     # 자산 요약 카드
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("💳 총 자산")
@@ -204,7 +203,6 @@ if menu == "🏠 홈":
     ac3.metric("연금저축2", "35,000,000원")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 🛑 원래 right_col에 있던 카드들이 이어서 아래로 배치됨
     # 다음 배당 일정 카드
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("📅 다음 배당 일정")
@@ -407,22 +405,4 @@ elif menu == "💰 배당":
 
 # 📊 포트폴리오 화면
 elif menu == "📊 포트폴리오":
-    st.title("💼 포트폴리오 및 리밸런싱 전략")
-    st.divider()
-
-    portfolio_data = pd.DataFrame({
-        "자산군": ["S&P500", "나스닥100", "금", "채권", "반도체", "인도"],
-        "목표 비중(%)": [25, 25, 20, 15, 10, 5],
-        "현재 비중(%)": [23, 27, 16, 18, 11, 5]
-    })
-    st.dataframe(portfolio_data, use_container_width=True, hide_index=True)
-
-elif menu == "📄 리포트":
-    st.title("📊 월간 투자 리포트")
-
-elif menu == "⚙️ 설정":
-    st.title("⚙️ 앱 설정 및 API 연동")
-
-# ⏱️ 7. 지정된 시간(30초) 대기 후 화면 자동 새로고침
-time.sleep(st.session_state.refresh_interval)
-st.rerun()
+    st.title("💼 포트폴리오 및 리밸
