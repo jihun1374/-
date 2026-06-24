@@ -159,19 +159,45 @@ if menu == "🏠 홈":
         dc2.metric("연 예상 배당", "1,850,000원")
         dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
 
-    # 🏦 계좌 현황
-    # 🏦 3. 계좌 현황 (제목 옆에 증권사 선택기 배치)
+    # # 🏦 3. 계좌 현황 (제목과 드롭다운 밀착 배치)
     with st.container(border=True):
-        # 1. 제목과 선택창을 한 줄에 배치
-        col_title, col_select = st.columns([1, 1])
+        # 1. 제목과 선택창을 한 줄에 배치 (비율을 3:2 정도로 조정하여 제목을 키움)
+        col_title, col_select = st.columns([3, 2], vertical_alignment="center")
+        
         with col_title:
-            st.subheader("🏦 계좌 현황")
+            st.markdown("### 🏦 계좌 현황") # subheader 대신 markdown으로 높이 정밀 조정
+            
         with col_select:
-            # 선택된 증권사가 바로 표시되도록 구성
+            # 레이블을 숨기고, 현재 선택된 증권사가 바로 표시되도록 함
             selected_broker = st.selectbox(
-                "조회할 계좌를 선택하세요", 
+                "계좌 선택", 
                 ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
-                label_visibility="collapsed" # 레이블을 숨겨서 깔끔하게 제목 옆에 붙입니다
+                label_visibility="collapsed"
+            )
+        
+        # 구분선 대신 투명한 여백을 주어 카드 안에서 깔끔하게 떨어지게 함
+        st.write("") 
+        
+        # 2. 선택된 계좌별 데이터 로직
+        ac1, ac2, ac3 = st.columns(3)
+        
+        # (로직 부분은 동일)
+        if selected_broker == "전체 계좌":
+            ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
+            ac2.metric("연금저축1", "18,000,000원")
+            ac3.metric("연금저축2", "35,000,000원")
+        elif selected_broker == "한국투자증권 (ISA)":
+            ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
+            ac2.metric("연금저축1", "-")
+            ac3.metric("연금저축2", "-")
+        elif selected_broker == "KB증권 (연금저축1)":
+            ac1.metric("ISA", "-")
+            ac2.metric("연금저축1", "18,000,000원")
+            ac3.metric("연금저축2", "-")
+        else:
+            ac1.metric("ISA", "-")
+            ac2.metric("연금저축1", "-")
+            ac3.metric("연금저축2", "35,000,000원")
             )
         
         # 2. 선택된 계좌별 데이터 로직 (나중에 API 연결 시 이 부분이 메인입니다!)
