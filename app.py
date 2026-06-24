@@ -159,7 +159,7 @@ if menu == "🏠 홈":
         dc2.metric("연 예상 배당", "1,850,000원")
         dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
 
-    # 🏦 3. 계좌 현황 (제목 옆 밀착 + 흰색 배경 + 작은 글씨)
+    # 🏦 3. 계좌 현황 (CSS 제거, 기본 깔끔한 배치)
     with st.container(border=True):
         col_title, col_select = st.columns([1, 1], vertical_alignment="center")
         
@@ -167,46 +167,17 @@ if menu == "🏠 홈":
             st.markdown("### 🏦 계좌 현황") 
             
         with col_select:
-            # 중첩 테두리를 없애고 깔끔하게 정돈하는 스타일
-            st.markdown("""
-                <style>
-                /* 드롭다운 상자 전체 스타일 */
-                div[data-testid="stSelectbox"] {
-                    margin-top: 0px !important;
-                }
-                /* 드롭다운 내부 입력창의 배경과 테두리를 단일화 */
-                div[data-testid="stSelectbox"] > div[data-baseweb="select"] {
-                    background-color: white !important;
-                    border: 1px solid #d1d8e0 !important;
-                    border-radius: 8px !important;
-                    height: 38px !important; 
-                }
-                /* 드롭다운 안의 글자 크기 조정 */
-                div[data-testid="stSelectbox"] div[role="combobox"] {
-                    font-size: 13px !important;
-                    padding-top: 2px !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)
-            
-            selected_broker = st.selectbox(
-                "계좌 선택", 
-                ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
-                label_visibility="collapsed"
-            )
-            """, unsafe_allow_html=True)
-            
+            # 스타일 태그를 아예 삭제했습니다.
             selected_broker = st.selectbox(
                 "계좌 선택", 
                 ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
                 label_visibility="collapsed"
             )
         
-        st.write("") # 간격 조절용
-        
-        # 2. 선택된 계좌별 데이터 로직
+        # 2. 선택된 계좌별 데이터
         ac1, ac2, ac3 = st.columns(3)
         
+        # (로직은 동일하게 유지)
         if selected_broker == "전체 계좌":
             ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
             ac2.metric("연금저축1", "18,000,000원")
