@@ -159,40 +159,49 @@ if menu == "🏠 홈":
         dc2.metric("연 예상 배당", "1,850,000원")
         dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
 
-    # 🏦 3. 계좌 현황 (CSS 제거, 기본 깔끔한 배치)
+    # 🏦 3. 계좌 현황 (제목 옆 밀착 + 흰색 배경)
     with st.container(border=True):
-        col_title, col_select = st.columns([1, 1], vertical_alignment="center")
+        # 비율을 2:1로 설정하여 제목 옆에 붙입니다.
+        col_title, col_select = st.columns([2, 1], vertical_alignment="center")
         
         with col_title:
             st.markdown("### 🏦 계좌 현황") 
             
         with col_select:
-            # 스타일 태그를 아예 삭제했습니다.
+            # CSS를 최소화하여 중첩 테두리 오류 방지
+            st.markdown("""
+                <style>
+                /* 드롭다운 상자 자체의 배경색만 흰색으로 강제 */
+                div[data-baseweb="select"] {
+                    background-color: white !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+            
             selected_broker = st.selectbox(
                 "계좌 선택", 
                 ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
                 label_visibility="collapsed"
             )
         
-        # 2. 선택된 계좌별 데이터
+        # 2. 선택된 계좌별 데이터 로직
         ac1, ac2, ac3 = st.columns(3)
         
-        # (로직은 동일하게 유지)
         if selected_broker == "전체 계좌":
             ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
             ac2.metric("연금저축1", "18,000,000원")
             ac3.metric("연금저축2", "35,000,000원")
         elif selected_broker == "한국투자증권 (ISA)":
             ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
-            ac2.metric("연금저축1", "-")
-            ac3.metric("연금저축2", "-")
+            ac2.metric("-", "-")
+            ac3.metric("-", "-")
         elif selected_broker == "KB증권 (연금저축1)":
-            ac1.metric("ISA", "-")
+            ac1.metric("-", "-")
             ac2.metric("연금저축1", "18,000,000원")
-            ac3.metric("연금저축2", "-")
+            ac3.metric("-", "-")
         else:
-            ac1.metric("ISA", "-")
-            ac2.metric("연금저축1", "-")
+            ac1.metric("-", "-")
+            ac2.metric("-", "-")
             ac3.metric("연금저축2", "35,000,000원")
 
     # 📅 다음 배당 일정
