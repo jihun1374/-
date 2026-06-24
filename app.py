@@ -127,15 +127,36 @@ if menu == "🏠 홈":
     st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 수요일")
     st.divider()
 
-    # 자산 요약
+    ## 자산 요약 (플러스: 빨간색 / 마이너스: 파란색 색상 적용)
     with st.container(border=True):
         st.subheader("💳 총 자산")
         st.markdown(f"## **{total_asset_krw:,.0f}원**")
         st.divider()
+        
+        # 🎨 하단 지표 레이아웃 분할
         mc1, mc2, mc3 = st.columns(3)
-        mc1.metric("총 평가손익", "+11,250,000원")
-        mc2.metric("오늘 평가손익", "+210,000원")
-        mc3.metric("총 수익률", "+10.8%")
+        
+        # 1. 총 평가손익 세팅 (+면 빨강, -면 파랑)
+        total_profit = 11250000  # 예시 데이터 (원하시는 변수로 대체 가능)
+        if total_profit >= 0:
+            mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_profit:,.0f}원</b>", unsafe_allow_html=True)
+        else:
+            mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{total_profit:,.0f}원</b>", unsafe_allow_html=True)
+            
+        # 2. 오늘 평가손익 세팅 (+면 빨강, -면 파랑)
+        today_profit = 210000   # 예시 데이터
+        if today_profit >= 0:
+            mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{today_profit:,.0f}원</b>", unsafe_allow_html=True)
+        else:
+            mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{today_profit:,.0f}원</b>", unsafe_allow_html=True)
+            
+        # 3. 총 수익률 세팅 (+면 빨강, -면 파랑)
+        total_rate = 10.8        # 예시 데이터
+        if total_rate >= 0:
+            mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_rate:.1f}%</b>", unsafe_allow_html=True)
+        else:
+            mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#1565c0;'>{total_rate:.1f}%</b>", unsafe_allow_html=True)
+        
 
     # 배당 현황
     with st.container(border=True):
