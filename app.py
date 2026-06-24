@@ -8,7 +8,7 @@ import requests
 st.set_page_config(
     page_title="포트폴리오",
     page_icon="📈",
-    layout="wide"
+    layout="centered"
 )
 
 # 🔄 2. 자동 새로고침 주기 설정값 선언
