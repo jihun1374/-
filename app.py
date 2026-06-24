@@ -223,68 +223,56 @@ if menu == "🏠 홈":
         fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    # 보유종목 TOP 10 
+    # # 📈 보유종목 TOP 10 (모바일 금융 앱 토스 스타일 커스텀)
     with st.container(border=True):
-        st.subheader("📈 보유종목 TOP 10")
-        
-        tiger_purchase_price = 10150.0
-        tiger_profit_krw = tiger_total_krw - (tiger_quantity * tiger_purchase_price)
-        tiger_profit_rate = (tiger_current_price - tiger_purchase_price) / tiger_purchase_price * 100
+        st.subheader("📈 보유종목 현황")
+        st.caption("실시간 주가 반영 및 보유 비중")
+        st.write("") 
 
         display_stocks = [
             {
-                "name": "TIGER 미국배당다우존스 (실시간)",
-                "total_value": f"{tiger_total_krw:,.0f}원",
-                "profit": f"{tiger_profit_krw:+,.0f}원",
-                "profit_color": "#d32f2f" if tiger_profit_krw >= 0 else "#1565c0",
-                "quantity": f"{tiger_quantity:,}주",
-                "buy_price": f"{tiger_purchase_price:,.0f}원",
-                "current_price": f"{tiger_current_price:,.0f}원",
-                "rate": f"{tiger_profit_rate:+.2f}%"
+                "name": "TIGER 미국배당다우존스",
+                "value": tiger_total_krw, 
+                "weight": (tiger_total_krw / total_asset_krw) * 100 if total_asset_krw > 0 else 0,
+                "color": "#1e6fd9" 
             },
             {
                 "name": "TIGER 미국S&P500",
-                "total_value": "12,500,000원",
-                "profit": "+1,450,000원",
-                "profit_color": "#d32f2f",
-                "quantity": "145주",
-                "buy_price": "76,200원",
-                "current_price": "86,200원",
-                "rate": "+13.12%"
+                "value": 12500000,
+                "weight": (12500000 / total_asset_krw) * 100 if total_asset_krw > 0 else 0,
+                "color": "#2cb0d4" 
             },
             {
                 "name": "TIGER 미국나스닥100",
-                "total_value": "8,200,000원",
-                "profit": "+1,280,000원",
-                "profit_color": "#d32f2f",
-                "quantity": "80주",
-                "buy_price": "86,500원",
-                "current_price": "102,500원",
-                "rate": "+18.50%"
+                "value": 8200000,
+                "weight": (8200000 / total_asset_krw) * 100 if total_asset_krw > 0 else 0,
+                "color": "#23cc9a" 
             }
         ]
 
         for s in display_stocks:
             html_card = f"""
-            <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border: 1px solid #e9ecef;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-weight: bold; font-size: 15px; color: #212529;">{s['name']}</span>
-                    <span style="font-weight: bold; font-size: 15px; color: #212529;">
-                        {s['total_value']} 
-                        <span style="font-size: 12px; font-weight: normal; color: {s['profit_color']}; margin-left: 4px;">({s['profit']})</span>
-                    </span>
+            <div style="
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 14px 8px; 
+                border-bottom: 1px solid #f1f3f5;
+            ">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="
+                        width: 16px; 
+                        height: 16px; 
+                        background-color: {s['color']}; 
+                        border-radius: 4px;
+                    "></div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 15px; font-weight: 600; color: #212529;">{s['name']}</span>
+                        <span style="font-size: 13px; color: #868e96;">{s['value']:,.0f}원</span>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6c757d;">
-                    <div>
-                        <span>보유: <b style="color:#495057;">{s['quantity']}</b></span>
-                        <span style="margin: 0 6px; color:#dee2e6;">|</span>
-                        <span>매입: <b style="color:#495057;">{s['buy_price']}</b></span>
-                        <span style="margin: 0 6px; color:#dee2e6;">|</span>
-                        <span>현재: <b style="color:#495057;">{s['current_price']}</b></span>
-                    </div>
-                    <div style="font-weight: bold; color: {s['profit_color']}; font-size: 13px;">
-                        {s['rate']}
-                    </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 15px; font-weight: 600; color: #343a40;">{s['weight']:.2f}%</span>
                 </div>
             </div>
             """
