@@ -159,21 +159,26 @@ if menu == "🏠 홈":
         dc2.metric("연 예상 배당", "1,850,000원")
         dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
 
-    # 🏦 3. 계좌 현황 (제목 옆 밀착 + 배경 흰색 고정)
+    # 🏦 3. 계좌 현황 (제목 옆 밀착 + 흰색 배경 + 작은 글씨)
     with st.container(border=True):
-        # 1. 제목과 선택창을 한 줄에 배치
-        col_title, col_select = st.columns([3, 2], vertical_alignment="center")
+        col_title, col_select = st.columns([1, 1], vertical_alignment="center")
         
         with col_title:
             st.markdown("### 🏦 계좌 현황") 
             
         with col_select:
-            # 배경을 흰색으로 고정하는 스타일 적용
+            # 드롭다운 디자인을 위한 스타일 (테두리 정돈 및 글자 크기 축소)
             st.markdown("""
                 <style>
+                div[data-testid="stSelectbox"] {
+                    margin-top: -10px;
+                }
                 div[data-testid="stSelectbox"] div {
                     background-color: white !important;
-                    border: 1px solid #e0e0e0 !important;
+                    border: 1px solid #d1d8e0 !important;
+                    border-radius: 8px !important;
+                    font-size: 13px !important;
+                    padding: 2px 8px !important;
                 }
                 </style>
             """, unsafe_allow_html=True)
@@ -183,6 +188,8 @@ if menu == "🏠 홈":
                 ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
                 label_visibility="collapsed"
             )
+        
+        st.write("") # 간격 조절용
         
         # 2. 선택된 계좌별 데이터 로직
         ac1, ac2, ac3 = st.columns(3)
