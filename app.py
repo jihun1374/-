@@ -127,38 +127,33 @@ if menu == "🏠 홈":
     st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 수요일")
     st.divider()
 
-    ## 자산 요약 (플러스: 빨간색 / 마이너스: 파란색 색상 적용)
+    # 💳 1. 자산 요약 (플러스: 빨간색 / 마이너스: 파란색 적용)
     with st.container(border=True):
         st.subheader("💳 총 자산")
         st.markdown(f"## **{total_asset_krw:,.0f}원**")
         st.divider()
         
-        # 🎨 하단 지표 레이아웃 분할
         mc1, mc2, mc3 = st.columns(3)
         
-        # 1. 총 평가손익 세팅 (+면 빨강, -면 파랑)
-        total_profit = 11250000  # 예시 데이터 (원하시는 변수로 대체 가능)
+        total_profit = 11250000  
         if total_profit >= 0:
             mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_profit:,.0f}원</b>", unsafe_allow_html=True)
         else:
             mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{total_profit:,.0f}원</b>", unsafe_allow_html=True)
             
-        # 2. 오늘 평가손익 세팅 (+면 빨강, -면 파랑)
-        today_profit = 210000   # 예시 데이터
+        today_profit = 210000   
         if today_profit >= 0:
             mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{today_profit:,.0f}원</b>", unsafe_allow_html=True)
         else:
             mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{today_profit:,.0f}원</b>", unsafe_allow_html=True)
             
-        # 3. 총 수익률 세팅 (+면 빨강, -면 파랑)
-        total_rate = 10.8        # 예시 데이터
+        total_rate = 10.8        
         if total_rate >= 0:
             mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_rate:.1f}%</b>", unsafe_allow_html=True)
         else:
             mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#1565c0;'>{total_rate:.1f}%</b>", unsafe_allow_html=True)
-        
 
-    # 배당 현황
+    # 💰 2. 배당 현황
     with st.container(border=True):
         st.subheader("💰 배당 현황")
         dc1, dc2, dc3 = st.columns(3)
@@ -166,7 +161,7 @@ if menu == "🏠 홈":
         dc2.metric("연 예상 배당", "1,850,000원")
         dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
 
-    # 계좌 현황
+    # 🏦 3. 계좌 현황
     with st.container(border=True):
         st.subheader("🏦 계좌 현황")
         ac1, ac2, ac3 = st.columns(3)
@@ -174,7 +169,7 @@ if menu == "🏠 홈":
         ac2.metric("연금저축1", "18,000,000원")
         ac3.metric("연금저축2", "35,000,000원")
 
-    # 다음 배당 일정
+    # 📅 4. 다음 배당 일정
     with st.container(border=True):
         st.subheader("📅 다음 배당 일정")
         cal_col1, cal_col2 = st.columns([1, 2])
@@ -186,10 +181,10 @@ if menu == "🏠 홈":
         if st.button("배당 전체보기", key="go_div", use_container_width=True):
             st.info("배당 탭으로 이동 기능을 구현할 예정입니다.")
 
-    # 리밸런싱 알림
+    # ⚠️ 5. 리밸런싱 알림
     st.warning("⚠️ **리밸런싱 알림**\n\n**금 ETF**가 목표 비중(20%)보다 **4% 부족**합니다. (현재 16%)  \n👉 **추가 매수를 권장합니다.**")
 
-    # Pie 자산배분 현황
+    # 🍩 6. Pie 자산배분 현황
     with st.container(border=True):
         st.subheader("Pie 자산배분 현황")
         allocation = pd.DataFrame({
@@ -200,7 +195,7 @@ if menu == "🏠 홈":
         fig.update_layout(margin=dict(t=0, b=0, l=0, r=0), height=250)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    # 포트폴리오 분석 그래프
+    # 📊 7. 포트폴리오 분석 그래프
     st.markdown("---")
     st.subheader("📊 내 포트폴리오 분석 (상세 시뮬레이션)")
     
@@ -223,7 +218,7 @@ if menu == "🏠 홈":
         fig_bar.update_traces(texttemplate='%{text:,.0f}원', textposition='outside')
         st.plotly_chart(fig_bar, use_container_width=True)
 
-    # # 📈 보유종목 TOP 10 (모바일 금융 앱 토스 스타일 커스텀)
+    # 📈 8. 보유종목 현황 (토스 앱 스타일 완전 적용 커스텀)
     with st.container(border=True):
         st.subheader("📈 보유종목 현황")
         st.caption("실시간 주가 반영 및 보유 비중")
