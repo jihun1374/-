@@ -125,31 +125,31 @@ if menu == "🏠 홈":
     st.caption(f"📅 {datetime.now().strftime('%Y.%m.%d')} 수요일")
     st.divider()
 
-    # 💳 자산 요약 (플러스: 빨간색 / 마이너스: 파란색 색상 고정 적용)
+    # # 💳 자산 요약 (구분선 제거 및 하단 밀착 토스 스타일)
     with st.container(border=True):
         st.subheader("💳 총 자산")
         st.markdown(f"## **{total_asset_krw:,.0f}원**")
-        st.divider()
         
+        # 🎨 하단 손익 지표 레이아웃 (구분선 없이 바로 아래 밀착)
         mc1, mc2, mc3 = st.columns(3)
         
         total_profit = 11250000  
         if total_profit >= 0:
-            mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_profit:,.0f}원</b>", unsafe_allow_html=True)
+            mc1.markdown(f"<span style='font-size:13px; color:#868e96;'>총 평가손익</span><br><b style='font-size:18px; color:#d32f2f;'>+{total_profit:,.0f}원</b>", unsafe_allow_html=True)
         else:
-            mc1.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{total_profit:,.0f}원</b>", unsafe_allow_html=True)
+            mc1.markdown(f"<span style='font-size:13px; color:#868e96;'>총 평가손익</span><br><b style='font-size:18px; color:#1565c0;'>{total_profit:,.0f}원</b>", unsafe_allow_html=True)
             
         today_profit = 210000   
         if today_profit >= 0:
-            mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#d32f2f;'>+{today_profit:,.0f}원</b>", unsafe_allow_html=True)
+            mc2.markdown(f"<span style='font-size:13px; color:#868e96;'>오늘 평가손익</span><br><b style='font-size:18px; color:#d32f2f;'>+{today_profit:,.0f}원</b>", unsafe_allow_html=True)
         else:
-            mc2.markdown(f"<span style='font-size:14px; color:#6c757d;'>오늘 평가손익</span><br><b style='font-size:24px; color:#1565c0;'>{today_profit:,.0f}원</b>", unsafe_allow_html=True)
+            mc2.markdown(f"<span style='font-size:13px; color:#868e96;'>오늘 평가손익</span><br><b style='font-size:18px; color:#1565c0;'>{today_profit:,.0f}원</b>", unsafe_allow_html=True)
             
         total_rate = 10.8        
         if total_rate >= 0:
-            mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#d32f2f;'>+{total_rate:.1f}%</b>", unsafe_allow_html=True)
+            mc3.markdown(f"<span style='font-size:13px; color:#868e96;'>총 수익률</span><br><b style='font-size:18px; color:#d32f2f;'>+{total_rate:.1f}%</b>", unsafe_allow_html=True)
         else:
-            mc3.markdown(f"<span style='font-size:14px; color:#6c757d;'>총 수익률</span><br><b style='font-size:24px; color:#1565c0;'>{total_rate:.1f}%</b>", unsafe_allow_html=True)
+            mc3.markdown(f"<span style='font-size:13px; color:#868e96;'>총 수익률</span><br><b style='font-size:18px; color:#1565c0;'>{total_rate:.1f}%</b>", unsafe_allow_html=True)
 
     # 💰 배당 현황
     with st.container(border=True):
