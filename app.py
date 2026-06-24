@@ -4,6 +4,7 @@ import plotly.express as px
 from datetime import datetime
 import time
 import yfinance as yf  # 📊 실시간 주가 연동 라이브러리
+import requests
 
 # ⚙️ 1. 페이지 설정
 st.set_page_config(
@@ -46,11 +47,45 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# 🌐 글로벌 마켓 실시간 상품 검색 함수 (야후 파이낸스 API 백엔드)
+def search_global_ticker(query):
+    if not query.strip():
+        return []
+    try:
+        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={query}&lang=ko-KR&region=KR"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        results = []
+        for quotes in data.get('quotes', []):
+            quote_type = quotes.get('quoteType', '')
+            if quote_type in ['EQUITY', 'ETF']:
+                ticker = quotes.get('symbol', '')
+                short_name = quotes.get('shortname', quotes.get('longname', 'Unknown Stock'))
+                exch = quotes.get('exchange', '')
+                
+                market_label = "🇺🇸 미국"
+                if ticker.endswith('.KS'): market_label = "🇰🇷 한국 (KOSPI)"
+                elif ticker.endswith('.KQ'): market_label = "🇰🇷 한국 (KOSDAQ)"
+                elif ticker.endswith('.T') or exch in ['TYO', 'JPN']: market_label = "🇯🇵 일본"
+                
+                results.append({
+                    "display_name": f"[{market_label}] {short_name} ({ticker})",
+                    "name": short_name,
+                    "ticker": ticker
+                })
+        return results
+    except:
+        return []
+
 # 🔐 4. 세션 상태 및 로그인 관리
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "setup_done" not in st.session_state:
     st.session_state.setup_done = False
+if "my_portfolio" not in st.session_state:
+    st.session_state.my_portfolio = []
 
 # [화면 A] 로그인 화면
 if not st.session_state.logged_in:
@@ -64,11 +99,37 @@ if not st.session_state.logged_in:
         st.rerun()
     st.stop()
 
-# [화면 B] 최초 설정 화면
+# [화면 B] 최초 설정 화면 (지훈님 원본 UI 흐름 결합)
 if not st.session_state.setup_done:
     st.title("최초 설정")
     st.button("한국투자증권 계좌 연동", use_container_width=True)
-    st.button("수동 포트폴리오 사용", use_container_width=True)
+    
+    # 수동 포트폴리오 섹션을 글로벌 검색 창으로 정교하게 대체
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("🔍 실시간 관련 종목 자동완성 검색")
+    search_query = st.text_input("상품명 또는 티커를 입력해 보세요 (예: 미국배당, SCHD, 삼성전자)", value="")
+    
+    if search_query:
+        global_results = search_global_ticker(search_query)
+        if global_results:
+            options_map = {res["display_name"]: res for res in global_results}
+            selected_display = st.selectbox("실제 상장된 정확한 상품명을 선택하세요 👇", list(options_map.keys()))
+            
+            selected_item = options_map[selected_display]
+            st.success(f"🎯 최종 선택: **{selected_item['name']}** | 자동 매칭 티커: `{selected_item['ticker']}`")
+            
+            input_qty = st.number_input("보유 수량 (주)", min_value=1, value=10)
+            if st.button("➕ 포트폴리오 목록에 저장", use_container_width=True):
+                st.session_state.my_portfolio.append({
+                    "name": selected_item["name"],
+                    "ticker": selected_item["ticker"],
+                    "quantity": input_qty
+                })
+                st.success("포트폴리오 대기열에 추가되었습니다!")
+        else:
+            st.warning("일치하는 글로벌 상품명이 없습니다.")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     dark_mode = st.toggle("다크모드")
     if st.button("설정 완료", use_container_width=True):
         st.session_state.setup_done = True
@@ -248,29 +309,34 @@ if menu == "🏠 홈":
     ]
 
     for s in display_stocks:
-        st.markdown(f"""
+        html_card = """
         <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-weight: bold; font-size: 15px; color: #212529;">{s['name']}</span>
+                <span style="font-weight: bold; font-size: 15px; color: #212529;">{name}</span>
                 <span style="font-weight: bold; font-size: 15px; color: #212529;">
-                    {s['total_value']} 
-                    <span style="font-size: 12px; font-weight: normal; color: {s['profit_color']}; margin-left: 4px;">({s['profit']})</span>
+                    {total_value} 
+                    <span style="font-size: 12px; font-weight: normal; color: {profit_color}; margin-left: 4px;">({profit})</span>
                 </span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6c757d;">
                 <div>
-                    <span>보유: <b style="color:#495057;">{s['quantity']}</b></span>
+                    <span>보유: <b style="color:#495057;">{quantity}</b></span>
                     <span style="margin: 0 6px; color:#dee2e6;">|</span>
-                    <span>매입: <b style="color:#495057;">{s['buy_price']}</b></span>
+                    <span>매입: <b style="color:#495057;">{buy_price}</b></span>
                     <span style="margin: 0 6px; color:#dee2e6;">|</span>
-                    <span>현재: <b style="color:#495057;">{s['current_price']}</b></span>
+                    <span>현재: <b style="color:#495057;">{current_price}</b></span>
                 </div>
-                <div style="font-weight: bold; color: {s['profit_color']}; font-size: 13px;">
-                    {s['rate']}
+                <div style="font-weight: bold; color: {profit_color}; font-size: 13px;">
+                    {rate}
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(
+            name=s['name'], total_value=s['total_value'], profit_color=s['profit_color'],
+            profit=s['profit'], quantity=s['quantity'], buy_price=s['buy_price'],
+            current_price=s['current_price'], rate=s['rate']
+        )
+        st.markdown(html_card, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # 💰 배당 화면
@@ -317,7 +383,7 @@ elif menu == "💰 배당":
             "연도": ["2024", "2025", "2026 예상"],
             "연간 배당금(원)": [1200000, 1550000, 1850000]
         })
-        fig_yearly = px.line(yearly_data, x="연度", y="연간 배당금(원)", markers=True, color_discrete_sequence=["#1565c0"])
+        fig_yearly = px.line(yearly_data, x="연도", y="연간 배당금(원)", markers=True, color_discrete_sequence=["#1565c0"])
         fig_yearly.update_traces(line=dict(width=4), marker=dict(size=10))
         fig_yearly.update_layout(height=350, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig_yearly, use_container_width=True, config={'displayModeBar': False})
