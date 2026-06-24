@@ -198,26 +198,6 @@ if menu == "🏠 홈":
             ac1.metric("ISA", "-")
             ac2.metric("연금저축1", "-")
             ac3.metric("연금저축2", "35,000,000원")
-        
-        # 2. 선택된 계좌별 데이터 로직 (나중에 API 연결 시 이 부분이 메인입니다!)
-        ac1, ac2, ac3 = st.columns(3)
-        
-        if selected_broker == "전체 계좌":
-            ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
-            ac2.metric("연금저축1", "18,000,000원")
-            ac3.metric("연금저축2", "35,000,000원")
-        elif selected_broker == "한국투자증권 (ISA)":
-            ac1.metric("ISA", f"{tiger_total_krw:,.0f}원")
-            ac2.metric("연금저축1", "-")
-            ac3.metric("연금저축2", "-")
-        elif selected_broker == "KB증권 (연금저축1)":
-            ac1.metric("ISA", "-")
-            ac2.metric("연금저축1", "18,000,000원")
-            ac3.metric("연금저축2", "-")
-        else: # 미래에셋 선택 시
-            ac1.metric("ISA", "-")
-            ac2.metric("연금저축1", "-")
-            ac3.metric("연금저축2", "35,000,000원")
 
     # 📅 다음 배당 일정
     with st.container(border=True):
