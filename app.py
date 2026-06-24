@@ -185,14 +185,17 @@ if menu == "🏠 홈":
     mc3.metric("총 수익률", "+10.8%")
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 배당 현황 카드
-    st.markdown('<div class="dividend-card">', unsafe_allow_html=True)
-    st.markdown("<h3 style='color: #2e7d32;'>💰 배당 현황</h3>", unsafe_allow_html=True)
+   # 💰 배당 현황 카드 (초록색 박스 버그 수정 완료)
+    st.markdown("""
+        <div class="dividend-card">
+            <h3 style='color: #2e7d32; margin-bottom: 0px;'>💰 배당 현황</h3>
+        </div>
+    """, unsafe_allow_html=True)
+    
     dc1, dc2, dc3 = st.columns(3)
     dc1.metric("이번 달 예상", "145,000원")
     dc2.metric("연 예상 배당", "1,850,000원")
     dc3.metric("배당수익률", f"{tiger_yield:.2f}%")
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # 계좌 현황 카드
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -405,4 +408,4 @@ elif menu == "💰 배당":
 
 # 📊 포트폴리오 화면
 elif menu == "📊 포트폴리오":
-    st.title("💼 포트폴리오 및 리밸
+    st.title("💼 포트폴리오 및 리밸런싱")
