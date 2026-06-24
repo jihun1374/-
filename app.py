@@ -167,20 +167,33 @@ if menu == "🏠 홈":
             st.markdown("### 🏦 계좌 현황") 
             
         with col_select:
-            # 드롭다운 디자인을 위한 스타일 (테두리 정돈 및 글자 크기 축소)
+            # 중첩 테두리를 없애고 깔끔하게 정돈하는 스타일
             st.markdown("""
                 <style>
+                /* 드롭다운 상자 전체 스타일 */
                 div[data-testid="stSelectbox"] {
-                    margin-top: -10px;
+                    margin-top: 0px !important;
                 }
-                div[data-testid="stSelectbox"] div {
+                /* 드롭다운 내부 입력창의 배경과 테두리를 단일화 */
+                div[data-testid="stSelectbox"] > div[data-baseweb="select"] {
                     background-color: white !important;
                     border: 1px solid #d1d8e0 !important;
                     border-radius: 8px !important;
+                    height: 38px !important; 
+                }
+                /* 드롭다운 안의 글자 크기 조정 */
+                div[data-testid="stSelectbox"] div[role="combobox"] {
                     font-size: 13px !important;
-                    padding: 2px 8px !important;
+                    padding-top: 2px !important;
                 }
                 </style>
+            """, unsafe_allow_html=True)
+            
+            selected_broker = st.selectbox(
+                "계좌 선택", 
+                ["전체 계좌", "한국투자증권 (ISA)", "KB증권 (연금저축1)", "미래에셋 (연금저축2)"],
+                label_visibility="collapsed"
+            )
             """, unsafe_allow_html=True)
             
             selected_broker = st.selectbox(
